@@ -1,5 +1,7 @@
 # Lab4
 
+![image-20241220081229891](C:\Users\ROG\AppData\Roaming\Typora\typora-user-images\image-20241220081229891.png)
+
 新建环境
 
 ```

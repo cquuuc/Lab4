@@ -1,0 +1,5 @@
+producting/Include/
+producting/Lib/
+producting/Scripts/
+producting/**/__pycache__/
+vue_project/node_modules/
