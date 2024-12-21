@@ -13,20 +13,17 @@ PROXY_HOST = "localhost"
 PROXY_PORT = 8000
 FetchURL = "https://api.open-meteo.com/v1/forecast"
 app = FastAPI()
-static_dir = os.path.abspath("../vue_project/dist")
+
+static_dir = os.path.abspath("../vue_project/distv3")
 print("当前工作目录:", os.getcwd())
 print("静态文件目录:", static_dir)
 vue_project_dir = os.path.abspath("../vue_project")
 print("vue_project 目录内容:", os.listdir(vue_project_dir))
 if not os.path.exists(static_dir):
     raise RuntimeError(f"目录 '{static_dir}' 不存在")
+
 app.mount("/static", StaticFiles(directory=static_dir), name="static")
-# app.mount(
-#     "/static",
-#     StaticFiles(directory=os.path.abspath("../vue_project/dist")),
-#     name="static",
-# )
-templates = Jinja2Templates(directory=os.path.abspath("../vue_project/dist"))
+templates = Jinja2Templates(directory=static_dir)
 df = pd.read_csv("europe.csv")
 
 # 定义全局变量
