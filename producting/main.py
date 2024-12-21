@@ -9,7 +9,7 @@ import asyncio
 import os
 
 # 代理服务器的配置
-PROXY_HOST = "localhost"
+PROXY_HOST = "0.0.0.0"
 PROXY_PORT = 8000
 FetchURL = "https://api.open-meteo.com/v1/forecast"
 app = FastAPI()
