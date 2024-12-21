@@ -6,14 +6,20 @@ from fastapi.staticfiles import StaticFiles
 import pandas as pd
 import aiohttp
 import asyncio
+import os
 
 # 代理服务器的配置
 PROXY_HOST = "localhost"
 PROXY_PORT = 8000
 FetchURL = "https://api.open-meteo.com/v1/forecast"
 app = FastAPI()
-app.mount("/static", StaticFiles(directory="../vue_project/dist"), name="static")
-templates = Jinja2Templates(directory="../vue_project/dist")
+print("当前工作目录:", os.getcwd())
+app.mount(
+    "/static",
+    StaticFiles(directory=os.path.abspath("../vue_project/dist")),
+    name="static",
+)
+templates = Jinja2Templates(directory=os.path.abspath("../vue_project/dist"))
 df = pd.read_csv("europe.csv")
 
 # 定义全局变量
@@ -41,6 +47,9 @@ async def get_temperature(session, country, city, latitude, longitude):
 
 async def update():
     global results  # 声明使用全局变量
+    if results:  # 如果 results 不为空，则不执行更新
+        print("Results already populated, skipping update.")
+        return
     async with aiohttp.ClientSession() as session:
         tasks = []
         results = []  # 清空全局结果
