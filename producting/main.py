@@ -16,6 +16,8 @@ app = FastAPI()
 static_dir = os.path.abspath("../vue_project/dist")
 print("当前工作目录:", os.getcwd())
 print("静态文件目录:", static_dir)
+vue_project_dir = os.path.abspath("../vue_project")
+print("vue_project 目录内容:", os.listdir(vue_project_dir))
 if not os.path.exists(static_dir):
     raise RuntimeError(f"目录 '{static_dir}' 不存在")
 app.mount("/static", StaticFiles(directory=static_dir), name="static")
