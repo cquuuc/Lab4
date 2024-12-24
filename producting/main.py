@@ -3,6 +3,8 @@ from fastapi.templating import Jinja2Templates
 from fastapi.responses import JSONResponse
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
+
 import pandas as pd
 import aiohttp
 import asyncio
@@ -13,7 +15,19 @@ PROXY_HOST = "0.0.0.0"
 PROXY_PORT = 8000
 FetchURL = "https://api.open-meteo.com/v1/forecast"
 app = FastAPI()
+# 设置CORS
+origins = [
+    "http://localhost:8080",  # 允许的前端应用地址
+    "http://192.168.0.4:8080",  # 允许的前端应用地址
+]
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,  # 允许的域
+    allow_credentials=True,
+    allow_methods=["*"],  # 允许的HTTP方法
+    allow_headers=["*"],  # 允许的请求头
+)
 static_dir = os.path.abspath("../vue_project/distv3")
 print("当前工作目录:", os.getcwd())
 print("静态文件目录:", static_dir)
