@@ -19,6 +19,9 @@ app = FastAPI()
 origins = [
     "http://localhost:8080",  # 允许的前端应用地址
     "http://192.168.0.4:8080",  # 允许的前端应用地址
+    "http://35.160.120.126",
+    "http://44.233.151.27",
+    "http://34.211.200.85",
 ]
 
 app.add_middleware(
