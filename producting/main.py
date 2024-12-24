@@ -26,12 +26,13 @@ origins = [
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,  # 允许的域
+    # allow_origins=origins,  # 允许的域
+    allow_origins=["*"],  # 允许所有来源，或指定你的前端地址
     allow_credentials=True,
     allow_methods=["*"],  # 允许的HTTP方法
     allow_headers=["*"],  # 允许的请求头
 )
-static_dir = os.path.abspath("../vue_project/distv3")
+static_dir = os.path.abspath("../vue_project/distv4")
 print("当前工作目录:", os.getcwd())
 print("静态文件目录:", static_dir)
 vue_project_dir = os.path.abspath("../vue_project")

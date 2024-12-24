@@ -2,7 +2,7 @@
   <div id="app" class="hide-scrollbar">
     <!-- <img alt="Vue logo" src="./assets/logo.png" /> -->
     <!-- <h1>{{ message }}</h1> -->
-    <!-- <p>Request URL: {{ requestUrl }}</p> -->
+    <p>Request URL: {{ requestUrl }}</p>
     <!-- <p>{{ data }}</p> -->
     <el-form :inline="true" :model="formInline" class="demo-form-inline">
       <el-form-item label="">
@@ -34,6 +34,7 @@
       style="width: 100%"
       max-height="400"
       v-loading="loading"
+      :default-sort="{ prop: 'temperature', order: 'descending' }"
     >
       <el-table-column label="city">
         <template slot-scope="scope">
@@ -47,7 +48,7 @@
           <span style="margin-left: 10px">{{ scope.row.country }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="temperature">
+      <el-table-column sortable prop="temperature" label="temperature">
         <template slot-scope="scope">
           <el-popover trigger="hover" placement="top">
             <p>
@@ -81,7 +82,8 @@
 </template>
 
 <script>
-const comurl = "http://127.0.0.1:8000";
+// const comurl = "http://localhost:8000";
+const comurl = "https://lab4-3z1m.onrender.com";
 async function fetchData(method, url, body = null) {
   const options = {
     method: method, // 请求方法
@@ -111,7 +113,7 @@ export default {
     return {
       message: "",
       requestUrl: "",
-      data: null,
+      data: [],
       loading: true,
       formInline: {
         capital: "",
