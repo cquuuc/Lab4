@@ -72,6 +72,8 @@ async def update():
 @app.get("/")
 async def home(request: Request):
     await update()  # 更新全局 results
+    print("Request URL:", request.url)
+    print("Results:", results)
     context = {"request": request, "message": "服务器已连接", "data": results}
     print("Server connected")
     return templates.TemplateResponse("index.html", context, status_code=200)
