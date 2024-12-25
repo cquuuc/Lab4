@@ -59,7 +59,7 @@
               <el-tag type="danger" effect="plain">{{ scope.row.city }}</el-tag>
             </p>
             <div slot="reference" class="name-wrapper">
-              <el-tag size="medium">{{ scope.row.temperature }}</el-tag>
+              <el-tag size="medium">{{ scope.row.temperature }}°C</el-tag>
             </div>
           </el-popover>
         </template>
@@ -83,7 +83,8 @@
 
 <script>
 // const comurl = "http://localhost:8000";
-const comurl = "https://lab4-3z1m.onrender.com";
+// // const comurl = "https://lab4-3z1m.onrender.com";
+const comurl = process.env.VUE_APP_API_URL;
 async function fetchData(method, url, body = null) {
   const options = {
     method: method, // 请求方法

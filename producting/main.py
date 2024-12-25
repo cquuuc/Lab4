@@ -32,7 +32,7 @@ app.add_middleware(
     allow_methods=["*"],  # 允许的HTTP方法
     allow_headers=["*"],  # 允许的请求头
 )
-static_dir = os.path.abspath("../vue_project/distv4")
+static_dir = os.path.abspath("../vue_project/distv5")
 print("当前工作目录:", os.getcwd())
 print("静态文件目录:", static_dir)
 vue_project_dir = os.path.abspath("../vue_project")
@@ -63,7 +63,7 @@ async def get_temperature(session, country, city, latitude, longitude):
     data = await fetch_data(session, FetchURL, params=params)
     if data:
         temperature = data["current_weather"]["temperature"]
-        return {"city": city, "country": country, "temperature": f"{temperature}°C"}
+        return {"city": city, "country": country, "temperature": temperature}
     return None
 
 
