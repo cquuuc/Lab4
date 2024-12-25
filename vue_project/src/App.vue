@@ -2,7 +2,7 @@
   <div id="app" class="hide-scrollbar">
     <!-- <img alt="Vue logo" src="./assets/logo.png" /> -->
     <!-- <h1>{{ message }}</h1> -->
-    <p>Request URL: {{ requestUrl }}</p>
+    <!-- <p>Request URL: {{ requestUrl }}</p> -->
     <!-- <p>{{ data }}</p> -->
     <el-form :inline="true" :model="formInline" class="demo-form-inline">
       <el-form-item label="">
@@ -27,12 +27,17 @@
       <el-form-item>
         <el-button type="primary" @click="add">New</el-button>
       </el-form-item>
+      <el-form-item>
+        <el-button type="primary" :loading="loading" @click="loadData"
+          >Update</el-button
+        >
+      </el-form-item>
     </el-form>
     <el-divider></el-divider>
     <el-table
-      :data="data"
+      :data="paginatedData"
       style="width: 100%"
-      max-height="400"
+      max-height="80vh"
       v-loading="loading"
       :default-sort="{ prop: 'temperature', order: 'descending' }"
     >
@@ -64,7 +69,7 @@
           </el-popover>
         </template>
       </el-table-column>
-      <el-table-column label="操作">
+      <el-table-column label="Action">
         <template slot-scope="scope">
           <!-- <el-button size="mini" @click="handleEdit(scope.$index, scope.row)"
             >编辑</el-button
@@ -78,6 +83,13 @@
         </template>
       </el-table-column>
     </el-table>
+    <el-pagination
+      @current-change="handleCurrentChange"
+      :current-page="currentPage"
+      :page-size="pageSize"
+      :total="data.length"
+      layout="total, prev, pager, next, jumper"
+    ></el-pagination>
   </div>
 </template>
 
@@ -122,12 +134,24 @@ export default {
         longitude: "",
         latitude: "",
       },
+      currentPage: 1, // 当前页码
+      pageSize: 8, // 每页显示的条目数
     };
   },
   mounted() {
     this.loadData();
   },
+  computed: {
+    paginatedData() {
+      const start = (this.currentPage - 1) * this.pageSize;
+      const end = start + this.pageSize;
+      return this.data.slice(start, end); // 返回当前页的数据
+    },
+  },
   methods: {
+    handleCurrentChange(page) {
+      this.currentPage = page; // 更新当前页码
+    },
     async loadData() {
       this.loading = true;
       try {
@@ -137,12 +161,16 @@ export default {
         this.notifysuc(this.message, this.requestUrl);
         console.log(result);
 
-        this.data = result.data; // 从响应中获取data
+        // this.data = result.data; // 从响应中获取data
+        // 对数据按照 temperature 升序排序
+        this.data = result.data.sort((a, b) => b.temperature - a.temperature);
+        this.currentPage = 1; // 重置当前页码
       } catch (error) {
         // 处理错误
-        this.notifyfail("错误", "数据加载失败");
+        // this.notifyfail("错误", "数据加载失败");
+        this.notifyfail("Eorr", "Data loading failure");
       } finally {
-        this.loading = false; // 无论成功与否都要关闭 loading
+        this.set_loda();
       }
     },
 
@@ -155,12 +183,15 @@ export default {
 
         this.data = [result.data, ...this.data];
         // 处理返回的数据
-        this.notifysuc("成功", "数据已成功提交");
+        // this.notifysuc("成功", "数据已成功提交");
+        this.notifysuc("Succ", "submitted successfully");
       } catch (error) {
         // 处理错误
-        this.notifyfail("错误", "数据提交失败");
+        // this.notifyfail("错误", "数据提交失败");
+        this.notifyfail("Eorr", "submitted failure");
       } finally {
-        this.loading = false; // 无论成功与否都要关闭 loading
+        this.set_loda();
+        // 无论成功与否都要关闭 loading
       }
     },
     async handleDelete(index, row) {
@@ -175,11 +206,13 @@ export default {
           (item) => item.city !== row.city || item.country !== row.country
         );
         console.log(result);
-        this.notifysuc("成功", "数据已成功删除");
+        // this.notifysuc("成功", "数据已成功删除");
+        this.notifysuc("Succ", "deleted successfully");
       } catch (error) {
-        this.notifyfail("错误", "数据删除失败");
+        // this.notifyfail("错误", "数据删除失败");
+        this.notifyfail("Eorr", "deleted failure");
       } finally {
-        this.loading = false;
+        this.set_loda();
       }
     },
     add() {
@@ -222,6 +255,11 @@ export default {
         type: "error",
         position: "bottom-right",
       });
+    },
+    set_loda() {
+      setTimeout(() => {
+        this.loading = false; // 无论成功与否都要关闭 loading
+      }, 1000);
     },
   },
 };

@@ -32,7 +32,7 @@ app.add_middleware(
     allow_methods=["*"],  # 允许的HTTP方法
     allow_headers=["*"],  # 允许的请求头
 )
-static_dir = os.path.abspath("../vue_project/distv5")
+static_dir = os.path.abspath("../vue_project/distv6")
 print("当前工作目录:", os.getcwd())
 print("静态文件目录:", static_dir)
 vue_project_dir = os.path.abspath("../vue_project")
@@ -100,7 +100,7 @@ async def home(request: Request):
 @app.get("/F5")
 async def F5(request: Request):
     await update()  # 更新全局 results
-    context = {"request": str(request.url), "message": "数据已更新", "data": results}
+    context = {"request": str(request.url), "message": "Data Update", "data": results}
     print("Data has been updated")
     return JSONResponse(content=context)
 
