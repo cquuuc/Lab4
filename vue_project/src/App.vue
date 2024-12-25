@@ -4,7 +4,12 @@
     <!-- <h1>{{ message }}</h1> -->
     <!-- <p>Request URL: {{ requestUrl }}</p> -->
     <!-- <p>{{ data }}</p> -->
-    <el-form :inline="true" :model="formInline" class="demo-form-inline">
+    <el-form
+      :inline="true"
+      :model="formInline"
+      ref="formInline"
+      class="demo-form-inline"
+    >
       <el-form-item label="">
         <el-input v-model="formInline.capital" placeholder="capital"></el-input>
       </el-form-item>
@@ -25,7 +30,9 @@
       </el-form-item>
 
       <el-form-item>
-        <el-button type="primary" @click="add">New</el-button>
+        <el-button :disabled="isAdding" type="primary" @click="add"
+          >New</el-button
+        >
       </el-form-item>
       <el-form-item>
         <el-button type="primary" :loading="loading" @click="loadData"
@@ -57,11 +64,13 @@
         <template slot-scope="scope">
           <el-popover trigger="hover" placement="top">
             <p>
-              Country：<el-tag type="success">{{ scope.row.country }}</el-tag>
+              Create：<el-tag type="success">{{ scope.row.created_at }}</el-tag>
             </p>
             <p>
-              City：
-              <el-tag type="danger" effect="plain">{{ scope.row.city }}</el-tag>
+              Update：
+              <el-tag type="danger" effect="plain">{{
+                scope.row.updated_at
+              }}</el-tag>
             </p>
             <div slot="reference" class="name-wrapper">
               <el-tag size="medium">{{ scope.row.temperature }}°C</el-tag>
@@ -134,6 +143,7 @@ export default {
         longitude: "",
         latitude: "",
       },
+      isAdding: false, // 控制按钮状态
       currentPage: 1, // 当前页码
       pageSize: 8, // 每页显示的条目数
     };
@@ -216,27 +226,37 @@ export default {
       }
     },
     add() {
+      if (this.isAdding) return; // 防止重复提交
+      this.isAdding = true;
+
       const hasEmpty = Object.values(this.formInline).some(
         (value) => value == ""
       );
       if (hasEmpty) {
         this.notifyfail("错误", "请填写所有字段");
+        this.isAdding = false; // 恢复状态
         return;
       }
+
       let { longitude, latitude } = this.formInline;
       // 验证经度
       if (isNaN(longitude) || longitude < -180 || longitude > 180) {
         this.notifyfail("错误", "经度必须在 -180 到 180 之间");
+        this.isAdding = false; // 恢复状态
         return;
       }
 
       // 验证纬度
       if (isNaN(latitude) || latitude < -90 || latitude > 90) {
         this.notifyfail("错误", "纬度必须在 -90 到 90 之间");
+        this.isAdding = false; // 恢复状态
         return;
       }
+
       // 继续处理表单提交
-      this.postData("/add", this.formInline);
+      this.postData("/add", this.formInline).finally(() => {
+        this.isAdding = false; // 恢复状态
+      });
     },
 
     notifysuc(title, message) {

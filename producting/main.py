@@ -4,7 +4,7 @@ from fastapi.responses import JSONResponse
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
-
+from datetime import datetime
 import pandas as pd
 import aiohttp
 import asyncio
@@ -32,7 +32,7 @@ app.add_middleware(
     allow_methods=["*"],  # 允许的HTTP方法
     allow_headers=["*"],  # 允许的请求头
 )
-static_dir = os.path.abspath("../vue_project/distv6")
+static_dir = os.path.abspath("../vue_project/distv7")
 print("当前工作目录:", os.getcwd())
 print("静态文件目录:", static_dir)
 vue_project_dir = os.path.abspath("../vue_project")
@@ -63,25 +63,129 @@ async def get_temperature(session, country, city, latitude, longitude):
     data = await fetch_data(session, FetchURL, params=params)
     if data:
         temperature = data["current_weather"]["temperature"]
-        return {"city": city, "country": country, "temperature": temperature}
+        current_time = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")   # 获取当前时间并格式化
+        return {
+            "city": city, 
+            "country": country, 
+            "latitude":latitude,
+            "longitude":longitude,
+            "temperature": temperature,            
+            "created_at": current_time,  # 添加创建日期
+            "updated_at": current_time   # 添加更新日期
+        }
     return None
 
 
+# async def update():
+#     global results  # 声明使用全局变量
+#     if results:
+#             tasks = []
+#             print("Results already populated, updating existing results.")
+#             for item in results:
+#                 country = item["country"]
+#                 city = item["city"]
+#                 latitude = item["latitude"]
+#                 longitude = item["longitude"]
+#                 task = get_temperature(session, country, city, latitude, longitude)
+#                 tasks.append(task)
+
+#             # 等待所有更新任务完成
+#             updated_results = await asyncio.gather(*tasks)
+#             # 更新原有的 results
+#             for i, updated_result in enumerate(updated_results):
+#                 if updated_result:
+#                     results[i]["temperature"] = updated_result["temperature"]
+#                     results[i]["updated_at"] = updated_result["updated_at"]  # 更新日期
+#             return
+#     async with aiohttp.ClientSession() as session:
+#         tasks = []
+#         results = []  # 清空全局结果
+#         for _, row in df.iterrows():
+#             country = row["country"]
+#             capital = row["capital"]
+#             latitude = row["latitude"]
+#             longitude = row["longitude"]
+#             task = get_temperature(session, country, capital, latitude, longitude)
+#             tasks.append(task)
+
+#         results = await asyncio.gather(*tasks)
+#         results = [result for result in results if result is not None]  # 过滤 None 值
+# async def update():
+#     global results  # 声明使用全局变量
+#     async with aiohttp.ClientSession() as session:
+#         if results:
+#             tasks = []
+#             print("Results already populated, updating existing results.")
+#             for item in results:
+#                 country = item["country"]
+#                 city = item["city"]
+#                 latitude = item["latitude"]
+#                 longitude = item["longitude"]
+#                 task = get_temperature(session, country, city, latitude, longitude)
+#                 tasks.append(task)
+
+#             # 等待所有更新任务完成
+#             updated_results = await asyncio.gather(*tasks)
+#             # 更新原有的 results
+#             for i, updated_result in enumerate(updated_results):
+#                 if updated_result:
+#                     results[i]["temperature"] = updated_result["temperature"]
+#                     results[i]["updated_at"] = updated_result["updated_at"]  # 更新日期
+#             return
+
+#         # 如果 results 为空，执行初始填充
+#         tasks = []
+#         results = []  # 清空全局结果
+#         for _, row in df.iterrows():
+#             country = row["country"]
+#             capital = row["capital"]
+#             latitude = row["latitude"]
+#             longitude = row["longitude"]
+#             task = get_temperature(session, country, capital, latitude, longitude)
+#             tasks.append(task)
+
+#         results = await asyncio.gather(*tasks)
+#         results = [result for result in results if result is not None]  # 过滤 None 值
+async def fetch_temperature(session, country, city, latitude, longitude):
+    try:
+        return await get_temperature(session, country, city, latitude, longitude)
+    except Exception as e:
+        print(f"Error fetching temperature for {city}, {country}: {e}")
+        return None
+
 async def update():
     global results  # 声明使用全局变量
-    if results:  # 如果 results 不为空，则不执行更新
-        print("Results already populated, skipping update.")
-        return
     async with aiohttp.ClientSession() as session:
         tasks = []
+
+        if results:
+            print("Results already populated, updating existing results.")
+            for item in results:
+                country = item["country"]
+                city = item["city"]
+                latitude = item["latitude"]
+                longitude = item["longitude"]
+                tasks.append(fetch_temperature(session, country, city, latitude, longitude))
+
+            # 等待所有更新任务完成
+            updated_results = await asyncio.gather(*tasks)
+            # 更新原有的 results
+            for i, updated_result in enumerate(updated_results):
+                if updated_result:
+                    results[i].update({
+                        "temperature": updated_result["temperature"],
+                        "updated_at": updated_result["updated_at"]  # 更新日期
+                    })
+            return
+
+        # 如果 results 为空，执行初始填充
         results = []  # 清空全局结果
         for _, row in df.iterrows():
             country = row["country"]
             capital = row["capital"]
             latitude = row["latitude"]
             longitude = row["longitude"]
-            task = get_temperature(session, country, capital, latitude, longitude)
-            tasks.append(task)
+            tasks.append(fetch_temperature(session, country, capital, latitude, longitude))
 
         results = await asyncio.gather(*tasks)
         results = [result for result in results if result is not None]  # 过滤 None 值
@@ -118,6 +222,7 @@ async def add(request: Request):
         result = await get_temperature(session, country, capital, latitude, longitude)
 
     if result:
+        result["updated_at"] = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")  # 更新日期
         results.append(result)  # 将新结果添加到全局 results
     print("Data added")
     return JSONResponse(content={"message": "数据已处理", "data": result})
